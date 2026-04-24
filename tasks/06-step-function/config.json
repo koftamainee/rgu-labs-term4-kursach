@@ -1,0 +1,13 @@
+{
+    "M": 10,
+    "h": 1,
+    "tau": 1.0,
+    "n_values": 5,
+    "distribution": "uniform",
+    "N_generations": 200,
+    "binomial_trials": 4,
+    "binomial_p": 0.5,
+    "geometric_max_k": 6,
+    "geometric_p": 0.4,
+    "triangular_n": 4
+}

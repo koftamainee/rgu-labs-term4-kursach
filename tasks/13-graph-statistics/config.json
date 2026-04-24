@@ -1,0 +1,16 @@
+{
+  "n": 10,
+  "edge_length": 10,
+  "graph_density": 0.99,
+  "seed": 14527346871,
+  "precision": "extreme",
+  "metrics": {
+    "mst_weight": true,
+    "longest_cycle_edges": true,
+    "heaviest_cycle_edges": true,
+    "isolated_vertices": true,
+    "spanning_trees": true,
+    "connected_components": true,
+    "clique_components": true
+  }
+}
