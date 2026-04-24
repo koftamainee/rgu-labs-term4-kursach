@@ -3,4 +3,11 @@
 - tasks/ &mdash; programming tasks rip & teared from [here](https://github.com/koftamainee/rgu-labs-term4-probability-modeling.git)
 - scripts/ &mdash; scripts to build tasks, generate tex kursach and build it into pdf
 
+## Build guide
+```bash
+git clone https://github.com/koftamainee/rgu-labs-term4-kursach.git
+cd rgu-labs-term4-kursach
+./scripts/build_kursach.sh
+```
+
 For LaTeX from yaml generation used [kursach-autogen](https://github.com/koftamainee/kursach-autogen.git)
