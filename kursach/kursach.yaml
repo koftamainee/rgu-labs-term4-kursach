@@ -1,0 +1,21 @@
+version: "1"
+
+meta:
+  university: "Ваш университет"
+  department: "Ваша кафедра"
+  subject: "Название дисциплины"
+  title: "Курсовая работа. Вариант 1"
+  author:
+    name: "Иванов И.И."
+    group: "ПМ-21"
+  supervisor:
+    name: "Петров П.П."
+    title: "доцент, к.т.н."
+  year: 2026
+  city: "Москва"
+
+style: !import "style/style.yaml"
+
+document:
+  - !import "sections/intro.yaml"
+  - !import "sections/references.yaml"

@@ -1,0 +1,12 @@
+id: references
+title: "Список использованных источников"
+numbered: false
+entries:
+  - id: ref.example
+    type: book
+    authors: ["Фамилия И.О."]
+    title: "Название книги"
+    publisher: "Издательство"
+    city: "Город"
+    year: 2024
+    pages: 256
