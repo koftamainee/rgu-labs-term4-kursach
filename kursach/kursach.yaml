@@ -1,21 +1,38 @@
 version: "1"
 
 meta:
-  university: "Ваш университет"
-  department: "Ваша кафедра"
-  subject: "Название дисциплины"
-  title: "Курсовая работа. Вариант 1"
+  university: "МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РФ"
+  faculty: "РГУ им. А.Н. Косыгина \\\\ (Технологии. Дизайн. Искусство)"
+  department: "Институт Информационных технологий и цифровой трансформации"
+  chair: "Кафедра <<Искусственного интеллекта, прикладной математики и программирования>>"
+  subject: "Вероятностное моделирование процессов и систем"
+  doc_type: "Курсовая работа"
+  title: "Создание приложений вероятностного моделирования"
+
   author:
-    name: "Иванов И.И."
-    group: "ПМ-21"
+    name: "Фриев Д.С."
+    group: "ИТПМ-124"
   supervisor:
-    name: "Петров П.П."
-    title: "доцент, к.т.н."
+    name: "Романенков А.М."
+    title: "доцент кафедры ИИПМиП"
   year: 2026
   city: "Москва"
+  # logo: "assets/kosygin.png"
 
 style: !import "style/style.yaml"
 
 document:
   - !import "sections/intro.yaml"
+  - !import "sections/task01.yaml"
+  - !import "sections/task02.yaml"
+  - !import "sections/task03.yaml"
+  - !import "sections/task04.yaml"
+  - !import "sections/task05.yaml"
+  - !import "sections/task06.yaml"
+  - !import "sections/task07.yaml"
+  - !import "sections/task08.yaml"
+  - !import "sections/task09.yaml"
+  - !import "sections/task11.yaml"
+  - !import "sections/task12.yaml"
+  - !import "sections/task13.yaml"
   - !import "sections/references.yaml"

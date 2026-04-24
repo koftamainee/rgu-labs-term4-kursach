@@ -1,8 +1,52 @@
 id: intro
 title: "Введение"
 numbered: false
-body:
-  - type: paragraph
-    text: |
-      В данном курсовом проекте рассматривается ... (замените на ваш текст).
-      Актуальность темы обусловлена ...
+subsections:
+
+  - id: intro_goal
+    title: "Цель и задачи"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Цель работы — программная реализация комплекса задач вероятностного моделирования. Для достижения цели необходимо решить следующие задачи:
+      - type: list
+        ordered: false
+        items:
+          - "разработать математические модели для каждого задания;"
+          - "продумать и создать архитектуру приложений;"
+          - "реализовать пользовательский интерфейс для управления параметрами моделирования;"
+
+  - id: intro_tech
+    title: "Используемые технологии"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Программная реализация выполнена на языке {{code:C++23}} с использованием следующих библиотек и инструментов:
+      - type: list
+        ordered: false
+        items:
+          - "{{code:CMake}} ({{url:https://github.com/Kitware/CMake}}) — система сборки проекта;"
+          - "{{code:Qt6 Quick}} ({{url:https://github.com/qt/qtdeclarative}}) — фреймворк для разработки графического интерфейса;"
+          - "{{code:GLFW}} ({{url:https://github.com/glfw/glfw}}), {{code:Dear ImGui}} ({{url:https://github.com/ocornut/imgui}}) и {{code:ImPlot}} ({{url:https://github.com/epezent/implot}}) — для визуализации графиков дискретной случайной величины в одном из заданий;"
+          - "{{code:nlohmann::json}} ({{url:https://github.com/nlohmann/json}}) — парсинг конфигурационных файлов;"
+          - "{{code:kursach-autogen}} ({{url:https://github.com/koftamainee/kursach-autogen/}}) — генерация пояснительной записки."
+      - type: paragraph
+        text: |
+          Все разработанные приложения устойчивы к аварийным завершениям, предусмотрена обработка ошибок ввода-вывода и некорректных параметров.
+
+  - id: intro_structure
+    title: "Структура пояснительной записки"
+    numbered: true
+    body:
+      - type: paragraph
+        text: "Документ имеет следующую структуру:"
+      - type: list
+        ordered: false
+        items:
+          - "введение;"
+          - "описание задач с подробностями их реализации;"
+          - "выводы;"
+          - "список использованных источников;"
+          - "приложение со ссылкой на репозиторий исходного кода."

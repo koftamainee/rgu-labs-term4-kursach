@@ -1,0 +1,7 @@
+id: task13
+title: "Cтатистика графа"
+numbered: true
+body:
+  - type: paragraph
+    text: |
+      Здесь будет описание задачи и её решения.

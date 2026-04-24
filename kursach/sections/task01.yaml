@@ -1,0 +1,185 @@
+id: task01
+title: "Выбор символа из алфавита"
+numbered: true
+body:
+  - type: paragraph
+    text: |
+      Из упорядоченного алфавита, содержащего $N$ различных символов, последовательно
+      выбирают два символа: сначала один, затем — один из оставшихся. Все исходы считаются
+      равновероятными. Требуется определить вероятность того, что в первый раз, во второй раз
+      и оба раза будет выбран символ с чётным номером. Индексация элементов алфавита начинается
+      с $1$. Рассматриваются два варианта нумерации после первой выборки:
+      а) индексы оставшихся элементов не изменяются;
+      б) индексы изменяются (переиндексируются начиная с $1$).
+      Необходимо реализовать приложение для проведения эксперимента, которое принимает через
+      командную строку мощность алфавита $N$ и количество экспериментов $C$, и выполнить
+      программное сравнение эмпирической и аналитической вероятностей.
+subsections:
+
+  - id: task01_analytical
+    title: "Аналитическое решение"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Пусть алфавит содержит $N$ символов с номерами от $1$ до $N$. Число чётных номеров равно
+          $\lfloor N/2 \rfloor$. Первый символ выбирается равновероятно из всех $N$ элементов.
+
+      - type: paragraph
+        text: "{{bold:Случай а) — фиксированные индексы.}}"
+
+      - type: formula
+        id: eq.p_first_fixed
+        content: 'P(\text{первый чётный}) = \frac{\lfloor N/2 \rfloor}{N}'
+
+      - type: paragraph
+        text: |
+          При фиксированных индексах после удаления первого элемента оставшиеся $N-1$ символов
+          сохраняют свои номера. Вероятность того, что второй выбранный символ имеет чётный номер,
+          зависит от чётности первого:
+
+      - type: formula
+        id: eq.p_second_fixed
+        content: 'P(\text{второй чётный}) = \frac{\lfloor N/2 \rfloor}{N} \cdot \frac{\lfloor N/2 \rfloor - 1}{N-1} + \frac{\lceil N/2 \rceil}{N} \cdot \frac{\lfloor N/2 \rfloor}{N-1}'
+
+      - type: formula
+        id: eq.p_both_fixed
+        content: 'P(\text{оба чётных}) = \frac{\lfloor N/2 \rfloor}{N} \cdot \frac{\lfloor N/2 \rfloor - 1}{N - 1}'
+
+      - type: paragraph
+        text: "{{bold:Случай б) — переиндексация после первой выборки.}}"
+
+      - type: paragraph
+        text: |
+          После удаления первого элемента оставшиеся $N-1$ символов получают новые порядковые
+          номера от $1$ до $N-1$. Число чётных позиций среди $N-1$ элементов равно $\lfloor (N-1)/2 \rfloor$.
+          Вероятность чётного номера при первом выборе не изменяется:
+
+      - type: formula
+        id: eq.p_first_reindexed
+        content: 'P(\text{первый чётный}) = \frac{\lfloor N/2 \rfloor}{N}'
+
+      - type: paragraph
+        text: |
+          После переиндексации вероятность чётного номера при втором выборе не зависит от результата
+          первого, поскольку новая нумерация определяется позицией в оставшемся списке:
+
+      - type: formula
+        id: eq.p_second_reindexed
+        content: 'P(\text{второй чётный}) = \frac{\lfloor (N-1)/2 \rfloor}{N-1}'
+
+      - type: formula
+        id: eq.p_both_reindexed
+        content: 'P(\text{оба чётных}) = \frac{\lfloor N/2 \rfloor}{N} \cdot \frac{\lfloor (N-1)/2 \rfloor}{N-1}'
+
+  - id: task01_empirical
+    title: "Эмпирическая проверка"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Программа принимает два параметра командной строки: мощность алфавита $N$ и количество
+          экспериментов $C$. Каждый эксперимент моделирует два последовательных выбора символа.
+          Для генерации случайных чисел используется Вихрь Мерсенна ({{code:std::mt19937}}).
+          Запуск серии экспериментов выполняется через вспомогательный класс {{code:TaskRunner}},
+          который принимает произвольный эксперимент в виде callable и возвращает вектор результатов.
+
+      - type: listing
+        id: lst.task01_fixed
+        language: C++
+        caption: "Эксперимент с фиксированными индексами"
+        content: |
+          auto experiment_fixed_indices = [alphabet_size](auto& rng) {
+              std::uniform_int_distribution<size_t> dist1(1, alphabet_size);
+              size_t first = dist1(rng);
+
+              std::vector<size_t> remaining;
+              remaining.reserve(alphabet_size - 1);
+              for (size_t i = 1; i <= alphabet_size; i++) {
+                  if (i != first) remaining.push_back(i);
+              }
+
+              std::uniform_int_distribution<size_t> dist2(0, remaining.size() - 1);
+              size_t second = remaining[dist2(rng)];
+
+              return Outcome{first % 2 == 0, second % 2 == 0};
+          };
+
+      - type: listing
+        id: lst.task01_reindexed
+        language: C++
+        caption: "Эксперимент с переиндексацией после первого выбора"
+        content: |
+          auto experiment_reindexed = [alphabet_size](auto& rng) {
+              std::vector<size_t> indices(alphabet_size);
+              std::iota(indices.begin(), indices.end(), 1);
+
+              std::uniform_int_distribution<size_t> dist1(0, indices.size() - 1);
+              size_t first_pos = dist1(rng);
+              bool first_even = (first_pos + 1) % 2 == 0;
+
+              indices.erase(indices.begin() + first_pos);
+
+              std::uniform_int_distribution<size_t> dist2(0, indices.size() - 1);
+              size_t second_pos = dist2(rng);
+              bool second_even = (second_pos + 1) % 2 == 0;
+
+              return Outcome{first_even, second_even};
+          };
+
+      - type: paragraph
+        text: |
+          Для подтверждения корректности полученных аналитических выражений был проведён
+          вычислительный эксперимент при фиксированном размере алфавита $N = 100$ и количестве
+          экспериментов $C = 10^8$ (сто миллионов итераций). Такой объём выборки обеспечивает
+          высокую точность оценки вероятностей и позволяет надёжно проверить сходимость
+          эмпирических частот к теоретическим значениям.
+
+      - type: paragraph
+        text: |
+          Результаты эксперимента представлены на рис.~{{ref:fig.convergence}}.
+
+      - type: figure
+        id: fig.convergence
+        path: "assets/task01.png"
+        caption: "Результаты эксперимента при $N = 100$, $C = 10^8$"
+        width: 0.9
+
+      - type: paragraph
+        text: |
+          Полученные эмпирические вероятности:
+
+      - type: table
+        id: tbl.results_task01
+        caption: "Результаты эксперимента при $N = 100$, $C = 10^8$"
+        columns: ["Вариант нумерации", "Первый чётный", "Второй чётный", "Оба чётных"]
+        rows:
+          - ["Фиксированные индексы", "0.499913", "0.500032", "0.247482"]
+          - ["Переиндексация", "0.499995", "0.494859", "0.247438"]
+
+      - type: paragraph
+        text: |
+          Теоретические значения при $N = 100$ составляют:
+
+      - type: formula
+        content: 'P_{\text{first}} = \frac{50}{100} = 0.5'
+
+      - type: formula
+        content: 'P_{\text{second}}^{(a)} = 0.5'
+
+      - type: formula
+        content: 'P_{\text{second}}^{(b)} = \frac{49}{99} \approx 0.494949'
+
+      - type: formula
+        content: 'P_{\text{both}} = \frac{50}{100} \cdot \frac{49}{99} \approx 0.247475'
+
+      - type: paragraph
+        text: |
+          Сравнение эмпирических и теоретических значений показывает высокую точность
+          моделирования. Максимальное абсолютное отклонение составляет $8.7 \times 10^{-5}$
+          для случая фиксированных индексов и $9.0 \times 10^{-5}$ для случая переиндексации.
+          Таким образом, экспериментальные данные подтверждают корректность аналитических
+          формул и правильность реализации обоих вариантов нумерации. Отметим также, что
+          вероятность $P_{\text{both}}$ совпадает для обоих вариантов нумерации (отличие
+          составляет $4.4 \times 10^{-5}$), что следует из комбинаторного смысла: выбор
+          двух чётных элементов из множества не зависит от последующей перенумерации.

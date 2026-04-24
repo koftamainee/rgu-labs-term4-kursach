@@ -1,0 +1,7 @@
+id: task06
+title: "Ступенчатая фигура"
+numbered: true
+body:
+  - type: paragraph
+    text: |
+      Здесь будет описание задачи и её решения.
