@@ -1,0 +1,7 @@
+id: task10
+title: "Подбрасывание монеты из кошелька"
+numbered: true
+body:
+  - type: paragraph
+    text: |
+      Здесь будет описание задачи и её решения.

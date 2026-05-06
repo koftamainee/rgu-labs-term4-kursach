@@ -32,6 +32,7 @@ document:
   - !import "sections/task07.yaml"
   - !import "sections/task08.yaml"
   - !import "sections/task09.yaml"
+  - !import "sections/task10.yaml"
   - !import "sections/task11.yaml"
   - !import "sections/task12.yaml"
   - !import "sections/task13.yaml"
