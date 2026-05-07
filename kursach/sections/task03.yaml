@@ -4,4 +4,104 @@ numbered: true
 body:
   - type: paragraph
     text: |
-      Здесь будет описание задачи и её решения.
+      В городе проживает $n+1$ человек. Один из них узнаёт новость и передаёт её
+      другому, тот — следующему, и так далее. На каждом шаге каждый знающий новость
+      выбирает $N$ случайных адресатов из $n$ остальных жителей и сообщает новость им.
+      Требуется определить вероятность того, что новость будет передана $r$ раз без:
+      а) возвращения к первому узнавшему (режим {{code:ReturnToSender}});
+      б) повторного сообщения кому-либо (режим {{code:RepeatedMessage}}).
+      Необходимо реализовать приложение для моделирования процесса с настраиваемыми
+      параметрами $n$, $r$, $N$, $K$ (число экспериментов), поддерживающее пошаговый
+      и пакетный режимы, визуализацию графа передачи и подсчёт эмпирических вероятностей.
+
+subsections:
+
+  - id: task03_model
+    title: "Модель и алгоритм"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Процесс моделируется на полном графе из $n+1$ вершин. Вершина $0$ — источник.
+          Состояние системы — булев массив {{code:knows}} размера $n+1$, изначально
+          {{code:knows[0] = true}}. На шаге $t$ каждый знающий выбирает $N$ случайных
+          получателей среди вершин, отличных от него самого.
+
+  - id: task03_implementation
+    title: "Ядро симуляции"
+    numbered: true
+    body:
+      - type: listing
+        id: lst.rumor_simulation
+        language: C++
+        caption: "Метод run() — выполнение одного эксперимента"
+        content: |
+          std::pair<bool, std::vector<Simulation::GraphNode>> Simulation::run(size_t r, int seed) {
+            m_rng = std::mt19937(seed);
+            std::uniform_int_distribution<int> dist(0, m_n);
+            std::vector<bool> knows(m_n + 1, false);
+            knows[0] = true;
+            std::vector<GraphNode> graph;
+
+            for (size_t step = 0; step < r; ++step) {
+              std::vector<size_t> knowers;
+              for (size_t i = 0; i <= m_n; ++i)
+                if (knows[i]) knowers.push_back(i);
+
+              for (size_t sender : knowers) {
+                for (size_t j = 0; j < m_N; ++j) {
+                  int target;
+                  do { target = dist(m_rng); } while (static_cast<size_t>(target) == sender);
+
+                  if (m_mode == Mode::ReturnToSender) {
+                    if (target == 0) {
+                      graph.push_back({sender, 0, step});
+                      return {false, graph};
+                    }
+                  } else {
+                    if (knows[static_cast<size_t>(target)]) {
+                      graph.push_back({sender, static_cast<size_t>(target), step});
+                      return {false, graph};
+                    }
+                  }
+                  graph.push_back({sender, static_cast<size_t>(target), step});
+                  knows[static_cast<size_t>(target)] = true;
+                }
+              }
+            }
+            return {true, graph};
+          }
+
+  - id: task03_visualization
+    title: "Визуализация и результаты"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Граф передачи для каждого эксперимента отображается в компоненте \\
+          {{code:ExperimentGraphView}}. Вершины размещаются силовым алгоритмом с анимацией сходимости.
+
+      - type: paragraph
+        text: |
+          Интерфейс позволяет настраивать $n$, $r$, $N$, $K$, выбирать режим
+          и запускать моделирование в пошаговом (с визуализацией каждого эксперимента)
+          или быстром пакетном режиме. Статистика (число успехов/неудач, эмпирическая
+          вероятность) обновляется в реальном времени.
+
+      - type: figure_group
+        id: fig.rumor_results
+        caption: "Интерфейс приложения и примеры результатов моделирования"
+        layout: vertical
+        figures:
+          - path: "assets/task03_gui.png"
+            subcaption: "Интерфейс приложения: настройка параметров, статистика, граф передачи"
+            width: 0.7
+
+          - path: "assets/task03_success.png"
+            subcaption: "Граф успешного эксперимента: новость передана $r$ раз без нарушений"
+            width: 0.7
+
+          - path: "assets/task03_failure.png"
+            subcaption: "Граф неудачного эксперимента: нарушение условия (возврат к источнику / повтор)"
+            width: 0.7
+      - type: page_break

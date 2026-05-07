@@ -75,6 +75,18 @@ for TASK_PATH in "$TASKS_DIR"/*/; do
         cp "$JSON_FILE" "$DEST/"
     done
 
+
+    for TXT_FILE in "$TASK_PATH"/*.txt; do
+        [ -f "$TXT_FILE" ] || continue
+
+        BASENAME=$(basename "$TXT_FILE")
+
+        [ "$BASENAME" = "CMakeLists.txt" ] && continue
+
+        echo "==> COPY $TASK_NAME (txt $BASENAME)"
+        cp "$TXT_FILE" "$DEST/"
+    done
+
     echo "==> DONE $TASK_NAME"
 
     if [ "$CLEAN" = "1" ] && [ -d "$TASK_PATH/build_release" ]; then

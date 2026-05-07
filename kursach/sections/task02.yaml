@@ -1,7 +1,162 @@
 id: task02
-title: "Моделирование эпидемии"
+title: "Моделирование эпидемии на графе социальных контактов"
 numbered: true
 body:
   - type: paragraph
     text: |
-      Здесь будет описание задачи и её решения.
+      Требуется реализовать стохастическую модель распространения инфекции
+      контактным путём на неориентированном графе знакомств. Для каждого контакта
+      «здоровый–инфицированный» заражение происходит с вероятностью $p_1 \in (0; 1]$.
+      Инфицированный выздоравливает на каждом шаге с вероятностью $p_2 \in [0; 1]$.
+      Программа должна предоставлять загрузку графа, пошаговое моделирование с
+      визуализацией на графе и аналитические запросы к результатам.
+
+subsections:
+
+  - id: task02_model
+    title: "Модель и структуры данных"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Граф контактов хранится в виде списка смежности. Каждая вершина — структура
+          {{code:Person}} с полями: идентификатор, состояние (Healthy, Infected,
+          Recovered) и вектор идентификаторов соседей.
+
+      - type: paragraph
+        text: |
+          Состояния образуют конечный автомат: Healthy $\to$ Infected (с вероятностью
+          $p_1$ при контакте), Infected $\to$ Recovered (с вероятностью $p_2$ на каждом
+          шаге). Состояние Recovered — поглощающее. Повторное заражение невозможно.
+
+      - type: listing
+        id: lst.person_struct
+        language: C++
+        caption: "Структура вершины и состояния эпидемиологической модели"
+        content: |
+          enum class PersonState { Healthy, Infected, Recovered };
+
+          struct Person {
+            int id;
+            PersonState state = PersonState::Healthy;
+            std::vector<int> contacts;
+          };
+
+      - type: paragraph
+        text: |
+          Генератор псевдослучайных чисел — Вихрь Мерсенна ({{code:std::mt19937}})
+          с равномерным распределением на $[0, 1)$. На каждом шаге для всех
+          инфицированных перебираются соседи, и заражение происходит при
+          $U(0,1) < p_1$. Затем аналогично проверяется выздоровление.
+
+  - id: task02_implementation
+    title: "Ядро симуляции"
+    numbered: true
+    body:
+      - type: listing
+        id: lst.simulation_core
+        language: C++
+        caption: "Метод step() — ядро симуляции"
+        content: |
+          const std::vector<Person>& Simulation::step() {
+              if (m_current_step == 0) {
+                  std::uniform_int_distribution<size_t> pick(0, m_people.size() - 1);
+                  m_people[pick(m_rng)].state = PersonState::Infected;
+                  m_current_step++;
+                  return m_people;
+              }
+
+              std::vector<int> newly_infected;
+              for (const auto& person : m_people) {
+                  if (person.state != PersonState::Infected) continue;
+                  for (int cid : person.contacts) {
+                      if ((m_people[cid].state == PersonState::Recovered ||
+                           m_people[cid].state == PersonState::Healthy) &&
+                          m_dist(m_rng) < p_infect)
+                          newly_infected.push_back(cid);
+                  }
+              }
+              for (int id : newly_infected) m_people[id].state = PersonState::Infected;
+
+              for (auto& person : m_people)
+                  if (person.state == PersonState::Infected && m_dist(m_rng) < p_recover)
+                      person.state = PersonState::Recovered;
+
+              m_current_step++;
+              return m_people;
+          }
+
+  - id: task02_queries
+    title: "Аналитические запросы к результатам"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Реализованы четыре поисковых запроса, выполняемых за один проход
+          по массиву вершин:
+
+      - type: list
+        ordered: false
+        items:
+          - "{{bold:Все не заразившиеся}} — вершины, оставшиеся в состоянии Healthy."
+          - "{{bold:Все исцелившиеся}} — вершины в состоянии Recovered."
+          - "{{bold:Исцелившиеся, чьё окружение не исцелилось}} — Recovered-вершины, среди соседей которых есть хотя бы одна не-Recovered."
+          - "{{bold:Не заразившиеся, чьё окружение полностью заражено}} — Healthy-вершины, у которых все соседи имеют состояние Infected."
+
+      - type: listing
+        id: lst.query_recovered_lonely
+        language: C++
+        caption: "Поиск исцелившихся с неисцелившимся окружением"
+        content: |
+          std::vector<int> Simulation::recovered_with_sick_contacts() const {
+              std::vector<int> r;
+              for (const auto& p : m_people) {
+                  if (p.state != PersonState::Recovered) continue;
+                  for (int cid : p.contacts) {
+                      if (m_people[cid].state != PersonState::Recovered) {
+                          r.push_back(p.id);
+                          break;
+                      }
+                  }
+              }
+              return r;
+          }
+
+  - id: task02_data
+    title: "Тестовые данные и визуализация"
+    numbered: true
+    body:
+      - type: paragraph
+        text: |
+          Тестовый граф — датасет Facebook-страниц категории «Artist» из коллекции
+          GEMSEC. Исходный CSV-файл содержит рёбра в формате
+          {{code:"u,v"}}. Для загрузки выполняется предобработка: запятая заменяется
+          пробелом. Параметры моделирования: $p_1 = 0.3$, $p_2 = 0.1$.
+
+      - type: paragraph
+        text: |
+          Визуализация графа реализована на QML с использованием {{code:Canvas}}.
+          Для работы с большими графами (до $10^5$ вершин) строится BFS-подграф от
+          вершины с максимальной степенью, ограниченный
+          заданным числом узлов. Размещение вершин — force-based алгоритм.
+
+      - type: paragraph
+        text: |
+          Отрисовка дифференцирует состояния вершин цветом: зелёный — Healthy,
+          красный — Infected, синий — Recovered. Рёбра отображаются при достаточном
+          масштабе. Поддерживаются панорамирование и масштабирование. Управление
+          симуляцией и запросами осуществляется через боковую панель интерфейса.
+
+      - type: figure_group
+        id: fig.epidemic_interface
+        caption: "Интерфейс приложения и пример аналитического запроса"
+        layout: vertical
+        figures:
+          - path: "assets/task02_gui.png"
+            subcaption: "Интерфейс приложения"
+            width: 0.95
+
+          - path: "assets/task02_search.png"
+            subcaption: "Пример аналитического запроса"
+            width: 0.95
+      - type: page_break # temp

@@ -27,7 +27,7 @@ fonts:
     line_spacing: 1.0
     italic: true
   listing_body:
-    family: "Inconsolata"
+    family: "DejaVu Sans Mono"
     size: 12pt
     line_spacing: 1.0
     align: left
